@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件上传 - 云盘系统</title>
+
+  <!-- CSS 文件 -->
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+
+  <!-- Font Awesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Bootstrap 文件上传插件 -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.9/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
+
+  <style>
+    .upload-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+    }
+
+    .upload-header {
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-sm);
+      padding: var(--spacing-md) var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .upload-header-title {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .upload-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-xl);
+    }
+
+    .upload-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: var(--spacing-2xl);
+      width: 100%;
+      max-width: 800px;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .upload-card-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .upload-card-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .upload-card-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .upload-form {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .upload-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      margin-top: var(--spacing-xl);
+    }
+
+    /* 自定义文件输入样式 */
+    .file-input-wrapper {
+      margin: var(--spacing-lg) 0;
+    }
+  </style>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <!-- Bootstrap JS 依赖 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.9/js/plugins/piexif.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.9/js/plugins/sortable.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.9/js/plugins/purify.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- 文件上传插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.9/js/fileinput.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.9/themes/fa/theme.js"></script>
+
+  <script src="/static/js/auth.js"></script>
+</head>
+
+<body class="upload-page">
+  <!-- 顶部导航栏 -->
+  <header class="upload-header">
+    <div class="upload-header-title">
+      <i class="fas fa-cloud"></i> 云盘系统
+    </div>
+    <button class="btn btn-secondary" onclick="backToHome()">
+      <i class="fas fa-arrow-left"></i> 返回主页
+    </button>
+  </header>
+
+  <!-- 上传区域 -->
+  <div class="upload-container">
+    <div class="upload-card">
+      <!-- 卡片头部 -->
+      <div class="upload-card-header">
+        <h1 class="upload-card-title">
+          <i class="fas fa-cloud-upload-alt"></i> 文件上传
+        </h1>
+        <p class="upload-card-subtitle">选择文件并上传到您的云盘空间</p>
+      </div>
+
+      <!-- 上传表单 -->
+      <form class="upload-form" id="uploadForm" action='#' method="post" enctype="multipart/form-data">
+        <div class="file-input-wrapper">
+          <input id="file" name="file" type="file" class="file" data-msg-placeholder="选择要上传的文件">
+        </div>
+      </form>
+
+      <!-- 操作按钮 -->
+      <div class="upload-actions">
+        <button type="button" class="btn btn-secondary" onclick="backToHome()">
+          <i class="fas fa-times"></i> 取消
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var hexcase = 0;
+    var chrsz = 8;
+
+    function hex_sha1(s) {
+      return binb2hex(core_sha1(AlignSHA1(s)));
+    }
+
+    function sha1_vm_test() {
+      return hex_sha1("abc") == "a9993e364706816aba3e25717850c26c9cd0d89d";
+    }
+
+    function core_sha1(blockArray) {
+      var x = blockArray;
+      var w = Array(80);
+      var a = 1732584193;
+      var b = -271733879;
+      var c = -1732584194;
+      var d = 271733878;
+      var e = -1009589776;
+
+      for (var i = 0; i < x.length; i += 16) {
+        var olda = a;
+        var oldb = b;
+        var oldc = c;
+        var oldd = d;
+        var olde = e;
+        for (var j = 0; j < 80; j++) {
+          if (j < 16)
+            w[j] = x[i + j];
+          else
+            w[j] = rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
+          var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)), safe_add(safe_add(e, w[j]), sha1_kt(j)));
+          e = d;
+          d = c;
+          c = rol(b, 30);
+          b = a;
+          a = t;
+        }
+
+        a = safe_add(a, olda);
+        b = safe_add(b, oldb);
+        c = safe_add(c, oldc);
+        d = safe_add(d, oldd);
+        e = safe_add(e, olde);
+      }
+      return new Array(a, b, c, d, e);
+    }
+
+    function sha1_ft(t, b, c, d) {
+      if (t < 20)
+        return (b & c) | ((~b) & d);
+      if (t < 40)
+        return b ^ c ^ d;
+      if (t < 60)
+        return (b & c) | (b & d) | (c & d);
+      return b ^ c ^ d;
+    }
+
+    function sha1_kt(t) {
+      return (t < 20) ? 1518500249 : (t < 40) ? 1859775393 : (t < 60) ? -1894007588 : -899497514;
+    }
+
+    function safe_add(x, y) {
+      var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+      var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+      return (msw << 16) | (lsw & 0xFFFF);
+    }
+
+    function rol(num, cnt) {
+      return (num << cnt) | (num >>> (32 - cnt));
+    }
+
+    function AlignSHA1(str) {
+      var nblk = ((str.length + 8) >> 6) + 1,
+        blks = new Array(nblk * 16);
+
+      for (var i = 0; i < nblk * 16; i++)
+        blks[i] = 0;
+
+      for (i = 0; i < str.length; i++)
+        blks[i >> 2] |= str.charCodeAt(i) << (24 - (i & 3) * 8);
+      blks[i >> 2] |= 0x80 << (24 - (i & 3) * 8);
+      blks[nblk * 16 - 1] = str.length * 8;
+      return blks;
+    }
+
+    function binb2hex(binarray) {
+      var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+      var str = "";
+      for (var i = 0; i < binarray.length * 4; i++) {
+        str += hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
+          hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8)) & 0xF);
+      }
+      return str;
+    }
+
+    // 返回主页
+    function backToHome() {
+      window.location.href = '/static/view/home.html?' + queryParams();
+    }
+
+    // 初始化文件上传插件
+    $(document).ready(function() {
+      $("#file").fileinput({
+        theme: 'fa',
+        uploadUrl: '/file/upload?' + queryParams(),
+        uploadAsync: true,
+        showPreview: true,
+        showUpload: true,
+        showRemove: true,
+        maxFileCount: 5,
+        allowedFileExtensions: null, // 允许所有文件类型
+        overwriteInitial: false,
+        language: 'zh',
+        msgPlaceholder: '选择要上传的文件...',
+        browseLabel: '浏览文件',
+        removeLabel: '移除',
+        uploadLabel: '上传',
+        cancelLabel: '取消',
+        msgSelected: '{n} 个文件已选择',
+        layoutTemplates: {
+          actionUpload: '<button type="button" class="btn btn-primary" title="上传文件">{uploadIcon}</button>',
+          actionDelete: '<button type="button" class="btn btn-danger" title="移除文件">{deleteIcon}</button>',
+        }
+      }).on('filebatchuploadsuccess', function(event, data, previewId, index) {
+        alert('文件上传成功！');
+        setTimeout(function() {
+          backToHome();
+        }, 1000);
+      }).on('filebatchuploaderror', function(event, data, msg) {
+        console.error('上传失败:', msg);
+        alert('文件上传失败：' + msg);
+      });
+    });
+  </script>
+</body>
+</html>
