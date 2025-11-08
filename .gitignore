@@ -72,3 +72,6 @@ client
 *.tmp
 *.temp
 *.bak
+
+# Claude code
+CLAUDE.md
