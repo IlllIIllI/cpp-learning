@@ -13,6 +13,7 @@
 #include "wfrest/FileUtil.h"
 #include "OssClient.h"
 #include "MessageQueue.h"
+#include "workflow/WFTaskFactory.h"
 
 #include <string>
 #include <map>
@@ -527,37 +528,35 @@ void CloudiskServer::register_fileupload_module()
 
             // 判断文件是否已经存在
             std::string file_path = upload_dir + "/" + file_hash;
-            if (FileUtil::file_exists(file_path)) {
-                return;
-            }
+            if (!FileUtil::file_exists(file_path)) {
+                // 写入本地磁盘
+                resp->Save(file_path, std::move(content), [file_path, file_hash](const struct FileIOArgs*) {
+                   auto oss_client = OssClient::GetInstance();
+                   if (oss_client) {
+                       if (!oss_client->FileExists(file_hash)) {
+                           auto mq = MessageQueue::GetInstance();
 
-            // 写入本地磁盘
-            std::string oss_content = content;
-            resp->Save(file_path, std::move(content));
+                           if (mq) {
+                               nlohmann::json task = {
+                                   { "file_path", file_path },
+                                   { "file_hash", file_hash }
+                               };
 
+                               // 发送消息
+                               if (mq->PublishMessage(task.dump())) {
+                                   std::cout << "The backup task has been sent." << std::endl;
+                               } else {
+                                   std::cerr << "Fail to send" << std::endl;
+                               }
+                           }
+                       } else {
+                           std::cerr << "File already exists in OSS, skip upload: " << file_hash << std::endl;
+                       }
+                   } 
+                });
 
-            // 上传 OSS 
-            auto oss_client = OssClient::GetInstance();
-            if (oss_client) {
-                if (!oss_client->FileExists(file_hash)) {
-                    auto mq = MessageQueue::GetInstance();
-
-                    if (mq) {
-                        nlohmann::json task = {
-                            { "file_path", file_path },
-                        };
-
-                        // 发送消息
-                        if (mq->PublishMessage(task.dump())) {
-                            std::cout << "The backup task has been sent." << std::endl;
-                        } else {
-                            std::cerr << "Fail to send" << std::endl;
-                        }
-                    }
-
-                } else {
-                    std::cerr << "File already exists in OSS, skip upload: " << file_hash << std::endl;
-                }
+            } else {    // 已经存在磁盘中
+                std::cout << "File already exists locally: " << file_hash << std::endl;
             }
         }
     });

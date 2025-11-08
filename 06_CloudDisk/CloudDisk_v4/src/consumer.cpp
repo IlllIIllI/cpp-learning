@@ -3,8 +3,9 @@
 #include "OssConfig.h"
 #include "nlohmann/json.hpp"
 #include <signal.h>
-#include <exception>
+#include <unistd.h> 
 
+#include <exception>
 #include <iostream>
 #include <atomic>
 #include <string>
@@ -52,8 +53,8 @@ int main()
         std::string queue_name = "oss.queue";
         channel->DeclareQueue(queue_name, false, true, false, false);
 
-        // 订阅队列
-        std::string consumer_tag = channel->BasicConsume(queue_name);
+        // 订阅队列, 手动确认
+        std::string consumer_tag = channel->BasicConsume(queue_name, "", false, false, false);
         std::cout << "Waiting for messages..." << std::endl;
 
         // 循环接收消息
@@ -63,6 +64,7 @@ int main()
             if (channel->BasicConsumeMessage(consumer_tag, envelope, 1000)) {
                 // 判断消息是否有效
                 if (!envelope || !envelope->Message()) {
+                    channel->BasicReject(envelope, false);
                     continue;
                 }
 
@@ -73,23 +75,20 @@ int main()
                     auto task = nlohmann::json::parse(message_body);
                     // 文件路径
                     std::string file_path = task["file_path"];
-                    // 获取文件名
-                    size_t diagonal_index = file_path.find_last_of('/');
-                    if (diagonal_index == std::string::npos) {
-                        throw std::runtime_error("Invalid file path format (no '/' found): " + file_path);
-                    }
-                    std::string file_hash = file_path.substr(diagonal_index + 1);
+                    std::string file_hash = task["file_hash"];
 
                     // 读取文件内容
                     std::ifstream file(file_path, std::ios::binary);
                     if (!file.is_open()) {
-                        throw std::runtime_error("Cannot open file: " + file_path);
+                        std::cerr << "File not found: " << file_path << std::endl;
+                        channel->BasicReject(envelope, false);
+                        continue;
                     }
                     std::string file_content{ std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>() };
                     // 关闭文件流
                     file.close();
 
-                    std::cout << "Processing: " << file_path
+                    std::cout << "Processing: " << file_hash 
                                << " (" << file_content.size() << " bytes)" << std::endl;
 
                     // 获取 OSS 实例
@@ -98,22 +97,20 @@ int main()
                     if (!oss_client->FileExists(file_hash)) {
                         // 上传文件
                         if (oss_client->UploadFile(file_hash, file_content)) {
-                            std::cout << "✓ Successfully backed up: " << std::endl;
-                            // 确定消息
+                            std::cout << "✓ Successfully backed up: " << file_hash << std::endl;
                             channel->BasicAck(envelope);
                         } else {
                             std::cerr << "Failed to backup: " << file_hash << std::endl;
-                            // 重新写入队列
                             channel->BasicReject(envelope, true);
                         }
+
                     } else {
                         std::cerr << "File already exists in OSS: " << file_hash << std::endl;
-                        // 确定消息
                         channel->BasicAck(envelope);
                     }
+
                 } catch (std::exception& e) {
-                    std::cerr << "Error processing message: " << e.what() << std::endl;
-                    // 不重新入列
+                    std::cerr << "Error processing message:" << e.what() << std::endl;
                     channel->BasicReject(envelope, false);
                 }
             }
