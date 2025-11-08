@@ -8,6 +8,7 @@
 #include <iostream>
 #include <atomic>
 #include <string>
+#include <fstream>
 
 using namespace AmqpClient;
 
@@ -70,10 +71,25 @@ int main()
                 try {
                     // 解析 JSON 消息
                     auto task = nlohmann::json::parse(message_body);
-                    std::string file_hash = task["file_hash"];
-                    std::string file_content = task["file_content"];
+                    // 文件路径
+                    std::string file_path = task["file_path"];
+                    // 获取文件名
+                    size_t diagonal_index = file_path.find_last_of('/');
+                    if (diagonal_index == std::string::npos) {
+                        throw std::runtime_error("Invalid file path format (no '/' found): " + file_path);
+                    }
+                    std::string file_hash = file_path.substr(diagonal_index + 1);
 
-                    std::cout << "Processing: " << file_hash
+                    // 读取文件内容
+                    std::ifstream file(file_path, std::ios::binary);
+                    if (!file.is_open()) {
+                        throw std::runtime_error("Cannot open file: " + file_path);
+                    }
+                    std::string file_content{ std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>() };
+                    // 关闭文件流
+                    file.close();
+
+                    std::cout << "Processing: " << file_path
                                << " (" << file_content.size() << " bytes)" << std::endl;
 
                     // 获取 OSS 实例
@@ -83,14 +99,22 @@ int main()
                         // 上传文件
                         if (oss_client->UploadFile(file_hash, file_content)) {
                             std::cout << "✓ Successfully backed up: " << std::endl;
+                            // 确定消息
+                            channel->BasicAck(envelope);
                         } else {
                             std::cerr << "Failed to backup: " << file_hash << std::endl;
+                            // 重新写入队列
+                            channel->BasicReject(envelope, true);
                         }
                     } else {
                         std::cerr << "File already exists in OSS: " << file_hash << std::endl;
+                        // 确定消息
+                        channel->BasicAck(envelope);
                     }
                 } catch (std::exception& e) {
                     std::cerr << "Error processing message: " << e.what() << std::endl;
+                    // 不重新入列
+                    channel->BasicReject(envelope, false);
                 }
             }
         }
