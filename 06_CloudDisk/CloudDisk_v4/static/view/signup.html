@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册 - 云盘系统</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%234A90E2'/><path d='M70 42c0-6-4-11-10-11-2 0-3 1-5 2-2-4-7-7-13-7-7 0-13 6-13 13 0 1 0 2 0.3 3-3 1.5-5 5-5 9 0 6 4 10 10 10h34c6 0 10-4 10-10 0-4-2-8-6-9z' fill='white'/></svg>" type="image/svg+xml">
+
+  <!-- CSS 文件 -->
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/auth.css">
+
+  <!-- Font Awesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- 页面标题 -->
+      <div class="auth-header">
+        <h1 class="auth-title">创建账户</h1>
+        <p class="auth-subtitle">注册您的云盘账户</p>
+      </div>
+
+      <!-- 注册表单 -->
+      <form class="auth-form" id="signupForm">
+        <!-- 用户名输入 -->
+        <div class="form-group">
+          <label class="form-label">用户名</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user"></i>
+            <input type="text"
+                   class="form-input"
+                   id="username"
+                   placeholder="请输入用户名"
+                   required
+                   autocomplete="username">
+          </div>
+        </div>
+
+        <!-- 密码输入 -->
+        <div class="form-group">
+          <label class="form-label">密码</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password"
+                   class="form-input has-right-icon"
+                   id="password"
+                   placeholder="请输入密码（至少6个字符）"
+                   required
+                   autocomplete="new-password">
+            <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon1')">
+              <i class="fas fa-eye" id="toggleIcon1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 确认密码输入 -->
+        <div class="form-group">
+          <label class="form-label">确认密码</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password"
+                   class="form-input has-right-icon"
+                   id="passwordc"
+                   placeholder="请再次输入密码"
+                   required
+                   autocomplete="new-password">
+            <button type="button" class="toggle-password" onclick="togglePassword('passwordc', 'toggleIcon2')">
+              <i class="fas fa-eye" id="toggleIcon2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 注册按钮 -->
+        <button type="submit" class="btn btn-primary btn-block">
+          注册
+        </button>
+      </form>
+
+      <!-- 页脚链接 -->
+      <div class="auth-footer">
+        <p>已有账户？ <a href="/static/view/signin.html">立即登录</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 密码可见性切换
+    function togglePassword(inputId, iconId) {
+      const passwordInput = document.getElementById(inputId);
+      const toggleIcon = document.getElementById(iconId);
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+      }
+    }
+
+    // 注册表单提交
+    $(document).ready(function() {
+      $('#signupForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const username = $('#username').val();
+        const password = $('#password').val();
+        const passwordc = $('#passwordc').val();
+
+        // 基础验证
+        if (!username || !password || !passwordc) {
+          alert('请填写完整信息');
+          return;
+        }
+
+        if (password.length < 6) {
+          alert('密码至少需要6个字符');
+          return;
+        }
+
+        if (password !== passwordc) {
+          alert('两次输入的密码不一致');
+          return;
+        }
+
+        // 发送注册请求
+        $.ajax({
+          url: "/user/signup",
+          type: "POST",
+          data: {
+            "username": username,
+            "password": password
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            const errorMsg = jqXHR.responseText || errorThrown || '注册失败';
+            alert(errorMsg);
+          },
+          success: function (data, textStatus, jqXHR) {
+            if (data == 'SUCCESS') {
+              alert('注册成功！即将跳转到登录页面...');
+              setTimeout(function() {
+                window.location.href = '/static/view/signin.html';
+              }, 1500);
+            } else {
+              alert(data);
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 云盘系统</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%234A90E2'/><path d='M70 42c0-6-4-11-10-11-2 0-3 1-5 2-2-4-7-7-13-7-7 0-13 6-13 13 0 1 0 2 0.3 3-3 1.5-5 5-5 9 0 6 4 10 10 10h34c6 0 10-4 10-10 0-4-2-8-6-9z' fill='white'/></svg>" type="image/svg+xml">
+
+  <!-- CSS 文件 -->
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/auth.css">
+
+  <!-- Font Awesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <!-- 页面标题 -->
+      <div class="auth-header">
+        <h1 class="auth-title">欢迎回来</h1>
+        <p class="auth-subtitle">登录您的云盘账户</p>
+      </div>
+
+      <!-- 登录表单 -->
+      <form class="auth-form" id="signinForm">
+        <!-- 用户名输入 -->
+        <div class="form-group">
+          <label class="form-label">用户名</label>
+          <div class="input-with-icon">
+            <i class="fas fa-user"></i>
+            <input type="text"
+                   class="form-input"
+                   id="username"
+                   placeholder="请输入用户名"
+                   required
+                   autocomplete="username">
+          </div>
+        </div>
+
+        <!-- 密码输入 -->
+        <div class="form-group">
+          <label class="form-label">密码</label>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password"
+                   class="form-input has-right-icon"
+                   id="password"
+                   placeholder="请输入密码"
+                   required
+                   autocomplete="current-password">
+            <button type="button" class="toggle-password" onclick="togglePassword()">
+              <i class="fas fa-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 登录按钮 -->
+        <button type="submit" class="btn btn-primary btn-block">
+          登录
+        </button>
+      </form>
+
+      <!-- 页脚链接 -->
+      <div class="auth-footer">
+        <p>还没有账户？ <a href="/user/signup">立即注册</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/auth.js"></script>
+
+  <script>
+    // 密码可见性切换
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('toggleIcon');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+      }
+    }
+
+    // 登录表单提交
+    $(document).ready(function() {
+      $('#signinForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const username = $('#username').val();
+        const password = $('#password').val();
+
+        // 基础验证
+        if (!username || !password) {
+          alert('请填写完整信息');
+          return;
+        }
+
+        // 发送登录请求
+        $.ajax({
+          url: "/user/signin",
+          type: "POST",
+          data: {
+            "username": username,
+            "password": password
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            if (textStatus == "error") {
+              alert(textStatus + " : " + errorThrown);
+            } else {
+              alert(textStatus);
+            }
+          },
+          success: function (body, textStatus, jqXHR) {
+            const resp = JSON.parse(body);
+            localStorage.setItem("token", resp.data.Token);
+            localStorage.setItem("username", resp.data.Username);
+            window.location.href = resp.data.Location;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

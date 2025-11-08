@@ -1,0 +1,93 @@
+# 编译产物
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dylib
+*.lib
+*.dll
+*.exe
+*.out
+*.app
+
+# CMake构建
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+Testing/
+install_manifest.txt
+*.cmake
+!CMakeLists.txt
+
+# 可执行文件
+bin/
+lib/
+server
+consumer
+client
+
+# 用户上传文件（重要）
+user_uploads/
+../user_uploads/
+
+# 日志
+*.log
+logs/
+
+# IDE和编辑器
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+
+# 系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# 调试文件
+*.dSYM/
+*.su
+*.idb
+*.pdb
+core
+core.*
+
+# 依赖信息
+*.d
+*.depend
+compile_commands.json
+
+# 配置文件（敏感信息）
+config/config.json
+.env
+.env.local
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 第三方库
+third_party/
+vendor/
+!third_party/.gitkeep
+
+# 测试和性能分析
+*.gcov
+*.gcda
+*.gcno
+callgrind.out.*
+perf.data*

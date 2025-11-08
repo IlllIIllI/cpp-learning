@@ -1,46 +1,46 @@
-# Prerequisites
+# 预处理文件
 *.d
 
-# Compiled Object files
+# 编译的目标文件
 *.slo
 *.lo
 *.o
 *.obj
 
-# Precompiled Headers
+# 预编译头文件
 *.gch
 *.pch
 
-# Linker files
+# 链接器文件
 *.ilk
 
-# Debugger Files
+# 调试器文件
 *.pdb
 
-# Compiled Dynamic libraries
+# 编译的动态链接库
 *.so
 *.dylib
 *.dll
 
-# Fortran module files
+# Fortran 模块文件
 *.mod
 *.smod
 
-# Compiled Static libraries
+# 编译的静态库
 *.lai
 *.la
 *.a
 *.lib
 
-# Executables
+# 可执行文件
 *.exe
 *.out
 *.app
 
-# debug information files
+# 调试信息文件
 *.dwo
 
-# CMake build files
+# CMake 构建文件
 build/
 CMakeCache.txt
 CMakeFiles/
@@ -52,7 +52,7 @@ CTestTestfile.cmake
 _deps
 user_uploads/
 
-# IDE and editors
+# IDE 和编辑器
 .vscode/
 .idea/
 *.swp
@@ -60,15 +60,15 @@ user_uploads/
 *~
 .DS_Store
 
-# Log files
+# 日志文件
 *.log
 
-# Executable files (common names)
+# 可执行文件（常见名称）
 bin/
 server
 client
 
-# Temporary files
+# 临时文件
 *.tmp
 *.temp
 *.bak

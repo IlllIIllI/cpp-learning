@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的文件 - 云盘系统</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%234A90E2'/><path d='M70 42c0-6-4-11-10-11-2 0-3 1-5 2-2-4-7-7-13-7-7 0-13 6-13 13 0 1 0 2 0.3 3-3 1.5-5 5-5 9 0 6 4 10 10 10h34c6 0 10-4 10-10 0-4-2-8-6-9z' fill='white'/></svg>" type="image/svg+xml">
+
+  <!-- CSS 文件 -->
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/home.css">
+
+  <!-- Font Awesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- 工具函数 -->
+  <script src="/static/js/utils.js"></script>
+  <script src="/static/js/auth.js"></script>
+</head>
+
+<body>
+  <div class="home-container">
+    <!-- 顶部导航栏 -->
+    <header class="header">
+      <div class="header-title">
+        <i class="fas fa-cloud"></i> 云盘系统
+      </div>
+    </header>
+
+    <!-- 主体内容区域 -->
+    <div class="main-content">
+      <!-- 侧边栏 -->
+      <aside class="sidebar">
+        <div class="user-card">
+          <img src="/static/img/avatar.jpeg" alt="用户头像" class="user-avatar">
+          <div class="user-name" id="username">加载中...</div>
+          <div class="user-info-item">
+            <span class="user-info-label">注册时间</span>
+            <span class="user-info-value" id="regtime">-</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 文件区域 -->
+      <main class="file-section">
+        <!-- 文件列表头部 -->
+        <div class="file-header">
+          <h2 class="file-title">
+            <i class="fas fa-folder-open"></i> 我的文件
+          </h2>
+          <button class="btn btn-success" onclick="toUploadFile()">
+            <i class="fas fa-upload"></i> 上传文件
+          </button>
+        </div>
+
+        <!-- 文件表格 -->
+        <div class="file-table-wrapper">
+          <table class="file-table" id="filetbl">
+            <thead>
+              <tr>
+                <th style="width: 40px;"></th>
+                <th>文件名</th>
+                <th style="width: 100px;">大小</th>
+                <th style="width: 150px;">上传时间</th>
+                <th style="width: 150px;">最后更新</th>
+                <th style="width: 120px; text-align: right;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="fileTableBody">
+              <!-- 文件列表将通过 JavaScript 动态加载 -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // 页面加载时执行
+    window.onload = function () {
+      // 加载用户信息
+      $.ajax({
+        url: "/user/info?" + queryParams(),
+        type: "GET",
+        error: function (jqXHR, textStatus, errorThrown) {
+          if (textStatus == "error") {
+            alert(textStatus + " : " + errorThrown);
+          } else {
+            alert(textStatus);
+          }
+        },
+        success: function (body, textStatus, jqXHR) {
+          const resp = JSON.parse(body);
+          document.getElementById("username").innerHTML = resp.data.Username;
+          document.getElementById("regtime").innerHTML = resp.data.SignupAt.split(' ')[0];
+          // 加载文件列表
+          updateFileList();
+        }
+      });
+    }
+
+    // 更新文件列表
+    function updateFileList() {
+      $.ajax({
+        url: "/file/query?" + queryParams(),
+        type: "POST",
+        data: {
+          limit: 15
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          if (textStatus == "error") {
+            alert(textStatus + " : " + errorThrown);
+          } else {
+            alert(textStatus);
+          }
+        },
+        success: function (body, textStatus, jqXHR) {
+          if (!body) {
+            return;
+          }
+          const data = JSON.parse(body);
+          if (!data || data.length <= 0) {
+            document.getElementById('fileTableBody').innerHTML =
+              '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">' +
+              '<i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>' +
+              '还没有上传任何文件</td></tr>';
+            return;
+          }
+
+          // 清空现有内容
+          const tbody = document.getElementById('fileTableBody');
+          tbody.innerHTML = '';
+
+          // 添加文件行
+          for (let i = 0; i < data.length; i++) {
+            const file = data[i];
+            const row = document.createElement('tr');
+
+            // 文件图标
+            const iconCell = document.createElement('td');
+            iconCell.className = 'file-icon';
+            iconCell.innerHTML = '<i class="fas ' + getFileIcon(file.FileName) + '"></i>';
+            row.appendChild(iconCell);
+
+            // 文件名和哈希
+            const nameCell = document.createElement('td');
+            nameCell.innerHTML =
+              '<div class="file-name-wrapper">' +
+              '  <span class="filename">' + file.FileName + '</span>' +
+              '  <span class="file-hash">' + file.FileHash.substr(0, 16) + '...</span>' +
+              '</div>';
+            row.appendChild(nameCell);
+
+            // 文件大小
+            const sizeCell = document.createElement('td');
+            sizeCell.className = 'file-size';
+            sizeCell.textContent = formatFileSize(file.FileSize);
+            row.appendChild(sizeCell);
+
+            // 上传时间
+            const uploadCell = document.createElement('td');
+            uploadCell.className = 'file-date';
+            uploadCell.textContent = file.UploadAt.split('.')[0];
+            row.appendChild(uploadCell);
+
+            // 最后更新
+            const updateCell = document.createElement('td');
+            updateCell.className = 'file-date';
+            updateCell.textContent = file.LastUpdated.split('.')[0];
+            row.appendChild(updateCell);
+
+            // 操作按钮
+            const actionCell = document.createElement('td');
+            actionCell.className = 'file-actions';
+            actionCell.innerHTML =
+              '<button class="btn-icon btn-download" onclick="downloadFile(\'/file/download?filename=' +
+              encodeURIComponent(file.FileName) + '&filehash=' + file.FileHash + '&' + queryParams() +
+              '\')" title="下载">' +
+              '  <i class="fas fa-download"></i>' +
+              '</button>';
+            row.appendChild(actionCell);
+
+            tbody.appendChild(row);
+          }
+        }
+      });
+    }
+
+    // 跳转到上传页面
+    function toUploadFile() {
+      window.location.href = '/file/upload?' + queryParams();
+    }
+
+    // 下载文件
+    function downloadFile(durl) {
+      window.location.href = durl;
+    }
+  </script>
+</body>
+</html>
