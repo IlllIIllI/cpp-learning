@@ -7,6 +7,7 @@
 #include "CloudiskServer.h"
 #include "OssClient.h"
 #include "OssConfig.h"
+#include "MessageQueue.h"
 
 #include <iostream>
 #include <signal.h>
@@ -47,6 +48,13 @@ int main()
         std::cerr << "Warning: OSS config not set, backup disabled" << std::endl;
     }
 
+    // 初始化 MessageQueue 
+    if (MessageQueue::Initialize()) {
+        std::cout << "MessageQueue enabled" << std::endl;
+    } else {
+        std::cerr << "Warning: MessageQueue initialization failed" << std::endl;
+    }
+
     // 创建云盘服务器对象
     CloudiskServer svr;
 
@@ -66,10 +74,13 @@ int main()
 
         // 清理 OSS 资源
         OssClient::Shutdown();
+
+        // 清理 MessageQueue 资源
+        MessageQueue::Shutdown();
+
     } else {
         // 服务器启动失败，输出错误信息
         std::cerr << "Error: server start failed!\n";
     }
-
     return 0;
 }

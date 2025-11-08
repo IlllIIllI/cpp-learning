@@ -12,11 +12,11 @@
 #include "wfrest/PathUtil.h"
 #include "wfrest/FileUtil.h"
 #include "OssClient.h"
+#include "MessageQueue.h"
 
 #include <string>
 #include <map>
 #include <vector>
-#include <thread>
 
 
 using namespace wfrest;
@@ -490,17 +490,18 @@ void CloudiskServer::register_fileupload_module()
             }   // 文件名正常
 
             // 通过文件内容生成哈希值
-            std::string hash_file = CryptoUtil::hash_data(content);
-            if (hash_file.empty()) {
+            std::string file_hash = CryptoUtil::hash_data(content);
+            if (file_hash.empty()) {
                 resp->set_status(HttpStatusBadRequest);
                 resp->String("There is an error in the document.");
+                return;
             }
             
 
             // 写入数据库
             std::string sql = "INSERT INTO tbl_file (uid, hashcode, filename, size) "
                               "VALUES (" + std::to_string(user.id_) + ", '"
-                              + hash_file + "', '"
+                              + file_hash + "', '"
                               + filename + "', "
                               + std::to_string(content.size()) + ")";
 
@@ -526,7 +527,7 @@ void CloudiskServer::register_fileupload_module()
             FileUtil::create_directories(upload_dir);
 
             // 判断文件是否已经存在
-            std::string file_path = upload_dir + "/" + hash_file;
+            std::string file_path = upload_dir + "/" + file_hash;
             if (FileUtil::file_exists(file_path)) {
                 return;
             }
@@ -539,22 +540,25 @@ void CloudiskServer::register_fileupload_module()
             // 上传 OSS 
             auto oss_client = OssClient::GetInstance();
             if (oss_client) {
-                if (!oss_client->FileExists(hash_file)) {
-                    // 异步上传
-                    std::thread
-                    (
-                        [oss_client, oss_content = std::move(oss_content), hash_file = std::move(hash_file)]() mutable
-                        {
-                            bool uploaded = oss_client->UploadFile(hash_file, std::move(oss_content));
-                            if (uploaded) {
-                                std::cout << "File backed up to OSS: " << hash_file << std::endl;
-                            } else {
-                                std::cerr << "OSS backup failed: " << hash_file << std::endl;
-                            }
+                if (!oss_client->FileExists(file_hash)) {
+                    auto mq = MessageQueue::GetInstance();
+
+                    if (mq) {
+                        nlohmann::json task = {
+                            { "file_hash", file_hash },
+                            { "file_content", oss_content }
+                        };
+
+                        // 发送消息
+                        if (mq->PublishMessage(task.dump())) {
+                            std::cout << "The backup task has been sent." << std::endl;
+                        } else {
+                            std::cerr << "Fail to send" << std::endl;
                         }
-                    ).detach();
+                    }
+
                 } else {
-                    std::cerr << "File already exists in OSS, skip upload: " << hash_file << std::endl;
+                    std::cerr << "File already exists in OSS, skip upload: " << file_hash << std::endl;
                 }
             }
         }
