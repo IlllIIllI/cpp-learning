@@ -544,8 +544,7 @@ void CloudiskServer::register_fileupload_module()
 
                     if (mq) {
                         nlohmann::json task = {
-                            { "file_hash", file_hash },
-                            { "file_content", oss_content }
+                            { "file_path", file_path },
                         };
 
                         // 发送消息
