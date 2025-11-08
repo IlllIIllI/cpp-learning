@@ -50,6 +50,7 @@ Makefile
 !CMakeLists.txt
 CTestTestfile.cmake
 _deps
+user_uploads/
 
 # IDE and editors
 .vscode/
