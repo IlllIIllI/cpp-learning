@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package user_service;
+
+// 用户信息
+message User {
+    int32 id = 1;
+    string username = 2;
+    string created_at = 3;
+}
+
+// 注册请求
+message SignupRequest {
+    string username = 1;
+    string password = 2;
+}
+
+// 注册响应
+message SignupResponse {
+    int32 code = 1;          // 0=成功, 其他=错误
+    string message = 2;      // 错误信息或成功提示
+}
+
+// 登录请求
+message SigninRequest {
+    string username = 1;
+    string password = 2;
+}
+
+// 登录响应
+message SigninResponse {
+    int32 code = 1;         // 0=成功 其他=错误
+    string message = 2;     // 错误信息 User user = 3;          // 用户信息 string token = 4;       // JWT Token
+}
+
+// 获取用户信息请求
+message GetUserInfoRequest {
+    string token = 1;
+}
+
+// 获取用户信息响应
+message GetUserInfoResponse {
+    int32 code = 1;             // 0=成功, 其他=错误
+    string message = 2;         // 错误信息
+    User user = 3;              // 用户信息
+}
+
+ // 用户服务定义
+service UserService {
+    // 用户注册
+    rpc Signup(SignupRequest) returns (SignupResponse);
+
+    // 用户登录
+    rpc Signin(SignupRequest) returns (SignupResponse);
+
+    // 获取用户信息
+    rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
+}
