@@ -23,7 +23,7 @@ public:
 	virtual void Signup(SignupRequest *request, SignupResponse *response,
 					srpc::RPCContext *ctx) = 0;
 
-	virtual void Signin(SignupRequest *request, SignupResponse *response,
+	virtual void Signin(SigninRequest *request, SigninResponse *response,
 					srpc::RPCContext *ctx) = 0;
 
 	virtual void GetUserInfo(GetUserInfoRequest *request, GetUserInfoResponse *response,
@@ -39,7 +39,7 @@ public:
  */
 
 using SignupDone = std::function<void (SignupResponse *, srpc::RPCContext *)>;
-using SigninDone = std::function<void (SignupResponse *, srpc::RPCContext *)>;
+using SigninDone = std::function<void (SigninResponse *, srpc::RPCContext *)>;
 using GetUserInfoDone = std::function<void (GetUserInfoResponse *, srpc::RPCContext *)>;
 
 class SRPCClient : public srpc::SRPCClient
@@ -49,9 +49,9 @@ public:
 	void Signup(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
 	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signup(const SignupRequest *req);
 
-	void Signin(const SignupRequest *req, SigninDone done);
-	void Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
-	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signin(const SignupRequest *req);
+	void Signin(const SigninRequest *req, SigninDone done);
+	void Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx);
+	WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> async_Signin(const SigninRequest *req);
 
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoDone done);
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoResponse *resp, srpc::RPCSyncContext *sync_ctx);
@@ -74,9 +74,9 @@ public:
 	void Signup(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
 	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signup(const SignupRequest *req);
 
-	void Signin(const SignupRequest *req, SigninDone done);
-	void Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
-	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signin(const SignupRequest *req);
+	void Signin(const SigninRequest *req, SigninDone done);
+	void Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx);
+	WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> async_Signin(const SigninRequest *req);
 
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoDone done);
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoResponse *resp, srpc::RPCSyncContext *sync_ctx);
@@ -99,9 +99,9 @@ public:
 	void Signup(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
 	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signup(const SignupRequest *req);
 
-	void Signin(const SignupRequest *req, SigninDone done);
-	void Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
-	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signin(const SignupRequest *req);
+	void Signin(const SigninRequest *req, SigninDone done);
+	void Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx);
+	WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> async_Signin(const SigninRequest *req);
 
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoDone done);
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoResponse *resp, srpc::RPCSyncContext *sync_ctx);
@@ -124,9 +124,9 @@ public:
 	void Signup(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
 	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signup(const SignupRequest *req);
 
-	void Signin(const SignupRequest *req, SigninDone done);
-	void Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
-	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signin(const SignupRequest *req);
+	void Signin(const SigninRequest *req, SigninDone done);
+	void Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx);
+	WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> async_Signin(const SigninRequest *req);
 
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoDone done);
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoResponse *resp, srpc::RPCSyncContext *sync_ctx);
@@ -149,9 +149,9 @@ public:
 	void Signup(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
 	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signup(const SignupRequest *req);
 
-	void Signin(const SignupRequest *req, SigninDone done);
-	void Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx);
-	WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> async_Signin(const SignupRequest *req);
+	void Signin(const SigninRequest *req, SigninDone done);
+	void Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx);
+	WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> async_Signin(const SigninRequest *req);
 
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoDone done);
 	void GetUserInfo(const GetUserInfoRequest *req, GetUserInfoResponse *resp, srpc::RPCSyncContext *sync_ctx);
@@ -238,7 +238,7 @@ inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> SRPCClient::asy
 	return fr;
 }
 
-inline void SRPCClient::Signin(const SignupRequest *req, SigninDone done)
+inline void SRPCClient::Signin(const SigninRequest *req, SigninDone done)
 {
 	auto *task = this->create_rpc_client_task("Signin", std::move(done));
 
@@ -246,7 +246,7 @@ inline void SRPCClient::Signin(const SignupRequest *req, SigninDone done)
 	task->start();
 }
 
-inline void SRPCClient::Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx)
+inline void SRPCClient::Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx)
 {
 	auto res = this->async_Signin(req).get();
 
@@ -257,12 +257,12 @@ inline void SRPCClient::Signin(const SignupRequest *req, SignupResponse *resp, s
 		*sync_ctx = std::move(res.second);
 }
 
-inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> SRPCClient::async_Signin(const SignupRequest *req)
+inline WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> SRPCClient::async_Signin(const SigninRequest *req)
 {
-	using RESULT = std::pair<SignupResponse, srpc::RPCSyncContext>;
+	using RESULT = std::pair<SigninResponse, srpc::RPCSyncContext>;
 	auto *pr = new WFPromise<RESULT>();
 	auto fr = pr->get_future();
-	auto *task = this->create_rpc_client_task<SignupResponse>("Signin", srpc::RPCAsyncFutureCallback<SignupResponse>);
+	auto *task = this->create_rpc_client_task<SigninResponse>("Signin", srpc::RPCAsyncFutureCallback<SigninResponse>);
 
 	task->serialize_input(req);
 	task->user_data = pr;
@@ -368,7 +368,7 @@ inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> SRPCHttpClient:
 	return fr;
 }
 
-inline void SRPCHttpClient::Signin(const SignupRequest *req, SigninDone done)
+inline void SRPCHttpClient::Signin(const SigninRequest *req, SigninDone done)
 {
 	auto *task = this->create_rpc_client_task("Signin", std::move(done));
 
@@ -376,7 +376,7 @@ inline void SRPCHttpClient::Signin(const SignupRequest *req, SigninDone done)
 	task->start();
 }
 
-inline void SRPCHttpClient::Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx)
+inline void SRPCHttpClient::Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx)
 {
 	auto res = this->async_Signin(req).get();
 
@@ -387,12 +387,12 @@ inline void SRPCHttpClient::Signin(const SignupRequest *req, SignupResponse *res
 		*sync_ctx = std::move(res.second);
 }
 
-inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> SRPCHttpClient::async_Signin(const SignupRequest *req)
+inline WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> SRPCHttpClient::async_Signin(const SigninRequest *req)
 {
-	using RESULT = std::pair<SignupResponse, srpc::RPCSyncContext>;
+	using RESULT = std::pair<SigninResponse, srpc::RPCSyncContext>;
 	auto *pr = new WFPromise<RESULT>();
 	auto fr = pr->get_future();
-	auto *task = this->create_rpc_client_task<SignupResponse>("Signin", srpc::RPCAsyncFutureCallback<SignupResponse>);
+	auto *task = this->create_rpc_client_task<SigninResponse>("Signin", srpc::RPCAsyncFutureCallback<SigninResponse>);
 
 	task->serialize_input(req);
 	task->user_data = pr;
@@ -498,7 +498,7 @@ inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> BRPCClient::asy
 	return fr;
 }
 
-inline void BRPCClient::Signin(const SignupRequest *req, SigninDone done)
+inline void BRPCClient::Signin(const SigninRequest *req, SigninDone done)
 {
 	auto *task = this->create_rpc_client_task("Signin", std::move(done));
 
@@ -506,7 +506,7 @@ inline void BRPCClient::Signin(const SignupRequest *req, SigninDone done)
 	task->start();
 }
 
-inline void BRPCClient::Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx)
+inline void BRPCClient::Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx)
 {
 	auto res = this->async_Signin(req).get();
 
@@ -517,12 +517,12 @@ inline void BRPCClient::Signin(const SignupRequest *req, SignupResponse *resp, s
 		*sync_ctx = std::move(res.second);
 }
 
-inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> BRPCClient::async_Signin(const SignupRequest *req)
+inline WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> BRPCClient::async_Signin(const SigninRequest *req)
 {
-	using RESULT = std::pair<SignupResponse, srpc::RPCSyncContext>;
+	using RESULT = std::pair<SigninResponse, srpc::RPCSyncContext>;
 	auto *pr = new WFPromise<RESULT>();
 	auto fr = pr->get_future();
-	auto *task = this->create_rpc_client_task<SignupResponse>("Signin", srpc::RPCAsyncFutureCallback<SignupResponse>);
+	auto *task = this->create_rpc_client_task<SigninResponse>("Signin", srpc::RPCAsyncFutureCallback<SigninResponse>);
 
 	task->serialize_input(req);
 	task->user_data = pr;
@@ -636,7 +636,7 @@ inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> TRPCClient::asy
 	return fr;
 }
 
-inline void TRPCClient::Signin(const SignupRequest *req, SigninDone done)
+inline void TRPCClient::Signin(const SigninRequest *req, SigninDone done)
 {
 	auto *task = this->create_rpc_client_task("/user_service.UserService/Signin", std::move(done));
 
@@ -648,7 +648,7 @@ inline void TRPCClient::Signin(const SignupRequest *req, SigninDone done)
 	task->start();
 }
 
-inline void TRPCClient::Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx)
+inline void TRPCClient::Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx)
 {
 	auto res = this->async_Signin(req).get();
 
@@ -659,12 +659,12 @@ inline void TRPCClient::Signin(const SignupRequest *req, SignupResponse *resp, s
 		*sync_ctx = std::move(res.second);
 }
 
-inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> TRPCClient::async_Signin(const SignupRequest *req)
+inline WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> TRPCClient::async_Signin(const SigninRequest *req)
 {
-	using RESULT = std::pair<SignupResponse, srpc::RPCSyncContext>;
+	using RESULT = std::pair<SigninResponse, srpc::RPCSyncContext>;
 	auto *pr = new WFPromise<RESULT>();
 	auto fr = pr->get_future();
-	auto *task = this->create_rpc_client_task<SignupResponse>("/user_service.UserService/Signin", srpc::RPCAsyncFutureCallback<SignupResponse>);
+	auto *task = this->create_rpc_client_task<SigninResponse>("/user_service.UserService/Signin", srpc::RPCAsyncFutureCallback<SigninResponse>);
 
 	if (this->params.callee_timeout >= 0)
 		task->get_req()->set_callee_timeout(this->params.callee_timeout);
@@ -805,7 +805,7 @@ inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> TRPCHttpClient:
 	return fr;
 }
 
-inline void TRPCHttpClient::Signin(const SignupRequest *req, SigninDone done)
+inline void TRPCHttpClient::Signin(const SigninRequest *req, SigninDone done)
 {
 	auto *task = this->create_rpc_client_task("Signin", std::move(done));
 
@@ -817,7 +817,7 @@ inline void TRPCHttpClient::Signin(const SignupRequest *req, SigninDone done)
 	task->start();
 }
 
-inline void TRPCHttpClient::Signin(const SignupRequest *req, SignupResponse *resp, srpc::RPCSyncContext *sync_ctx)
+inline void TRPCHttpClient::Signin(const SigninRequest *req, SigninResponse *resp, srpc::RPCSyncContext *sync_ctx)
 {
 	auto res = this->async_Signin(req).get();
 
@@ -828,12 +828,12 @@ inline void TRPCHttpClient::Signin(const SignupRequest *req, SignupResponse *res
 		*sync_ctx = std::move(res.second);
 }
 
-inline WFFuture<std::pair<SignupResponse, srpc::RPCSyncContext>> TRPCHttpClient::async_Signin(const SignupRequest *req)
+inline WFFuture<std::pair<SigninResponse, srpc::RPCSyncContext>> TRPCHttpClient::async_Signin(const SigninRequest *req)
 {
-	using RESULT = std::pair<SignupResponse, srpc::RPCSyncContext>;
+	using RESULT = std::pair<SigninResponse, srpc::RPCSyncContext>;
 	auto *pr = new WFPromise<RESULT>();
 	auto fr = pr->get_future();
-	auto *task = this->create_rpc_client_task<SignupResponse>("Signin", srpc::RPCAsyncFutureCallback<SignupResponse>);
+	auto *task = this->create_rpc_client_task<SigninResponse>("Signin", srpc::RPCAsyncFutureCallback<SigninResponse>);
 
 	if (this->params.callee_timeout >= 0)
 		task->get_req()->set_callee_timeout(this->params.callee_timeout);

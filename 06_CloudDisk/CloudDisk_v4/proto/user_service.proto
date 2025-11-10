@@ -30,7 +30,9 @@ message SigninRequest {
 // 登录响应
 message SigninResponse {
     int32 code = 1;         // 0=成功 其他=错误
-    string message = 2;     // 错误信息 User user = 3;          // 用户信息 string token = 4;       // JWT Token
+    string message = 2;     // 错误信息
+    User user = 3;          // 用户信息
+    string token = 4;       // JWT Token
 }
 
 // 获取用户信息请求
@@ -51,7 +53,7 @@ service UserService {
     rpc Signup(SignupRequest) returns (SignupResponse);
 
     // 用户登录
-    rpc Signin(SignupRequest) returns (SignupResponse);
+    rpc Signin(SigninRequest) returns (SigninResponse);
 
     // 获取用户信息
     rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);

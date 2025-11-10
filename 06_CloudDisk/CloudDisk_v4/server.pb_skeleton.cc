@@ -19,7 +19,7 @@ public:
 		// TODO: fill server logic here
 	}
 
-	void Signin(::user_service::SignupRequest *request, ::user_service::SignupResponse *response, srpc::RPCContext *ctx) override
+	void Signin(::user_service::SigninRequest *request, ::user_service::SigninResponse *response, srpc::RPCContext *ctx) override
 	{
 		// TODO: fill server logic here
 	}

@@ -14,7 +14,7 @@ static void signup_done(::user_service::SignupResponse *response, srpc::RPCConte
 {
 }
 
-static void signin_done(::user_service::SignupResponse *response, srpc::RPCContext *context)
+static void signin_done(::user_service::SigninResponse *response, srpc::RPCContext *context)
 {
 }
 
