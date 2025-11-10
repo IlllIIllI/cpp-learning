@@ -1,0 +1,16 @@
+# 构建输出
+build/
+*.o
+*.a
+
+# 生成的数据文件
+data/*.dat
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 测试报告
+test_report.txt
