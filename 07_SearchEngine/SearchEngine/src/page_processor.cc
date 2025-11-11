@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <regex>
 
 #include "directory_scanner.h"
 
@@ -105,6 +106,11 @@ void PageProcessor::ExtractDocuments(const std::string& dir) {
       if (content == nullptr) {
         continue;
       }
+
+      // 对内容进行正则表达式
+      std::string str_content = content;
+      std::regex reg("<[^>]+>");
+      str_content = std::regex_replace(str_content, reg, "");
 
       // 存入数据
       Document new_doc;
