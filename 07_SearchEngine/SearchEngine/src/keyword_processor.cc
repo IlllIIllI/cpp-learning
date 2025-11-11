@@ -97,24 +97,20 @@ void KeyWordProcessor::CreateChineseDict(const std::string& dir,
         continue;
       }
 
-      // 过滤纯空白字符
-      bool is_whitespace = std::all_of(word.begin(), word.end(),
-        [](unsigned char c) { return std::isspace(c); });
-      if (is_whitespace) {
-        continue;
-      }
-      
-      // 过滤纯数字
-      bool is_pure_number = std::all_of(word.begin(), word.end(),
-        [](unsigned char c) { return std::isdigit(c); });
-      if (is_pure_number) {
-        continue;
+      // 只保留包含汉字的词
+      bool contains_chinese = false;
+      const char* it = word.c_str();
+      const char* end = word.c_str() + word.size();
+
+      while (it != end) {
+        char32_t codepoint = utf8::next(it, end);
+        if (codepoint >= 0x4E00 && codepoint <= 0x9FFF) {
+          contains_chinese = true;
+          break;
+        }
       }
 
-      // 过滤纯标点
-      bool is_punctuation = std::all_of(word.begin(), word.end(),
-        [](unsigned char c) { return std::ispunct(c); });
-      if (is_punctuation) {
+      if (!contains_chinese) {
         continue;
       }
 
@@ -143,7 +139,7 @@ void KeyWordProcessor::BuildChineseIndex(const std::string& dict_file,
   if (ifs.is_open()) {
     std::string word;
     int freq;
-    int word_id = 0;
+    int word_id = 1;
 
     while (ifs >> word >> freq) {
       word_to_id[word] = word_id++;
@@ -238,7 +234,7 @@ void KeyWordProcessor::BuildEnglishIndex(const std::string& dict_file,
   if (ifs.is_open()) {
     std::string word;
     int freq;
-    int word_id = 0;
+    int word_id = 1;
 
     while (ifs >> word >> freq) {
       // 为当前单词的所有字母添加相同的 word_id

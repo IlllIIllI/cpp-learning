@@ -9,6 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # 设置编译选项
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -g")
 
+# 设置可执行文件输出目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # 包含头文件目录
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
