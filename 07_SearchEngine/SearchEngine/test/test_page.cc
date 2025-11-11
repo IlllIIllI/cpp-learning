@@ -11,7 +11,7 @@ int main() {
   search_engine::PageProcessor processor;
 
   // 处理网页语料库
-  std::string webpages_dir = "../corpus/webpages";
+  std::string webpages_dir = "corpus/webpages";
 
   std::cout << "开始处理网页语料库..." << std::endl;
   processor.Process(webpages_dir);
