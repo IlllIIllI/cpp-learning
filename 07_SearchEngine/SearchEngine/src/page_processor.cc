@@ -107,17 +107,27 @@ void PageProcessor::ExtractDocuments(const std::string& dir) {
         continue;
       }
 
-      // 对内容进行正则表达式
-      std::string str_content = content;
-      std::regex reg("<[^>]+>");
-      str_content = std::regex_replace(str_content, reg, "");
+      // 对内容进行正则表达式，去除 HTML 标签和实体
+      static const std::regex tag_reg("<[^>]+>");
+      static const std::regex nbsp_reg("&nbsp;");
+      static const std::regex lt_reg("&lt;");
+      static const std::regex gt_reg("&gt;");
+      static const std::regex amp_reg("&amp;");
+      static const std::regex quot_reg("&quot;");
+
+      std::string str_content = std::regex_replace(content, tag_reg, "");
+      str_content = std::regex_replace(str_content, nbsp_reg, " ");
+      str_content = std::regex_replace(str_content, lt_reg, "<");
+      str_content = std::regex_replace(str_content, gt_reg, ">");
+      str_content = std::regex_replace(str_content, amp_reg, "&");
+      str_content = std::regex_replace(str_content, quot_reg, "\"");
 
       // 存入数据
       Document new_doc;
       new_doc.id = documents_.size() + 1;
       new_doc.link = link ? link : "";
       new_doc.title = title ? title : "";
-      new_doc.content = content;
+      new_doc.content = str_content;  // 使用处理后的内容
       documents_.push_back(new_doc);
     }
   }
